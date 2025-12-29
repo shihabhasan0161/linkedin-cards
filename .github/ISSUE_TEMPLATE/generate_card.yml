@@ -1,7 +1,7 @@
 name: 📇 Generate LinkedIn Card
 description: Enter the data to automatically generate the SVGs for your post.
 title: "[NEW POST]: "
-labels: ["content", "automation"]
+labels: ["post"]
 body:
   - type: markdown
     attributes:
@@ -40,7 +40,7 @@ body:
     id: time
     attributes:
       label: Time posted
-      description: Date.
+      description: Date (YYYY-MM-DD format recommended for sorting).
       placeholder: "2025-01-27"
     validations:
       required: true
@@ -73,7 +73,7 @@ body:
     id: reactions
     attributes:
       label: Reaction Count
-      description: Number of likes/interactions.
+      description: Number of interactions.
       placeholder: "145"
       value: "0"
     validations:
@@ -83,17 +83,17 @@ body:
     id: comments
     attributes:
       label: Comments
-      description: Footer text info.
+      description: Number of comments.
       placeholder: "24"
       value: "0"
     validations:
       required: false
-    
+      
   - type: input
     id: repost
     attributes:
       label: Reposts
-      description: Footer text info.
+      description: Number of reposts.
       placeholder: "3"
       value: "0"
     validations:
