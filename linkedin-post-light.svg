@@ -1,17 +1,18 @@
-<svg fill="none" viewBox="0 0 550 670" width="550" height="670" xmlns="http://www.w3.org/2000/svg">
+<svg fill="none" viewBox="0 0 600 720" width="600" height="720" xmlns="http://www.w3.org/2000/svg">
   
   <foreignObject width="100%" height="100%">
-    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; height: 100%;">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; height: 100%; display: flex; align-items: center; justify-content: center;">
       
       <style>
         .linkedin-card {
           --card-width: 550px;
           --card-padding: 25px;
-          /* Ajustamos la altura de línea para que el cálculo sea exacto */
           --line-height: 28px; 
           
           display: flex;
           flex-direction: column;
+          
+          /* TEMA CLARO: Fondo blanco y borde gris suave */
           background: white;
           border: 1px solid #e0e0e0;
           border-radius: 8px;
@@ -19,6 +20,9 @@
           width: var(--card-width);
           height: 670px;
           box-sizing: border-box;
+          
+          /* Sombra suave para que destaque sobre el fondo blanco de GitHub */
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .header-section {
@@ -28,22 +32,18 @@
           flex-shrink: 0; 
         }
 
-        /* --- CORRECCIÓN EN LA SECCIÓN DE TEXTO --- */
         .text-section {
           padding: 0 var(--card-padding); 
           margin-top: 15px;
           
           font-size: 18px;
+          /* TEMA CLARO: Texto oscuro */
           color: #191919;
           
-          /* Definimos la altura de cada renglón */
           line-height: var(--line-height);
-          
-          /* Altura máxima exacta: 5 líneas * 28px = 140px */
           max-height: calc(var(--line-height) * 5);
           min-height: calc(var(--line-height) * 5); 
           
-          /* TRUCO PUNTOS SUSPENSIVOS NATIVOS */
           display: -webkit-box;
           -webkit-line-clamp: 5;
           -webkit-box-orient: vertical;
@@ -56,6 +56,7 @@
           width: calc(var(--card-width) - (var(--card-padding) * 2));
           height: 330px;
           margin: var(--card-padding) auto 0 auto; 
+          /* TEMA CLARO: Fondo gris muy claro */
           background-color: #f3f3f3;
           border-radius: 10px;
           overflow: hidden;
@@ -65,6 +66,7 @@
         .footer-section {
           padding: 0 var(--card-padding);
           height: 60px;
+          /* TEMA CLARO: Fondo blanco */
           background-color: white;
           display: flex;
           align-items: center;
@@ -73,7 +75,7 @@
           margin-top: auto; 
         }
 
-        /* ANIMACIONES */
+        /* ANIMACIONES (Idénticas) */
         .gallery-slide {
           position: absolute; top: 0; left: 0; width: 100%; height: 100%;
           background-size: cover; background-position: center;
