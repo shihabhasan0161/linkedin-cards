@@ -152,8 +152,7 @@ Change `MAX_CARDS_TO_GENERATE` secret to control how many cards are displayed (r
 
 ## Example
 
-<!-- BEGIN LINKEDIN -->
-<!-- END LINKEDIN -->
+See this README for a live example of generated cards.
 
 ## License
 
