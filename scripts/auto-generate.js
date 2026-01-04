@@ -4,6 +4,13 @@ import fs from 'fs';
 import path from 'path';
 import https from 'https';
 import http from 'http';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const ACTION_PATH = path.join(__dirname, '..');
+const USER_REPO_PATH = process.cwd();
 
 dotenv.config();
 
@@ -119,7 +126,7 @@ function filterOwnPosts(items, username) {
 }
 
 function updateReadme(generatedCardsData, maxCards) {
-    const readmePath = path.join(process.cwd(), 'README.md');
+    const readmePath = path.join(USER_REPO_PATH, 'README.md');
     let readme = fs.readFileSync(readmePath, 'utf8');
     
     const cardHTML = generatedCardsData.map((card, index) => {
@@ -209,7 +216,7 @@ function getAnimationKeyframes(imageCount) {
 }
 
 async function generateCard(post) {
-    const outputDir = path.join(process.cwd(), 'cards');
+    const outputDir = path.join(USER_REPO_PATH, 'cards');
     if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true });
     }
@@ -237,7 +244,7 @@ async function generateCard(post) {
     
     for (const theme of themes) {
         const templateName = hasImages ? `linkedin-post-${theme}.svg` : `linkedin-post-${theme}-text.svg`;
-        const templatePath = path.join(process.cwd(), 'templates', templateName);
+        const templatePath = path.join(ACTION_PATH, 'templates', templateName);
         let template = fs.readFileSync(templatePath, 'utf8');
         
         template = template.replace(/\$\{name\}/g, name);
@@ -281,7 +288,7 @@ async function generateCard(post) {
 (async () => {
     try {
         // Ensure required directories exist
-        const cardsDir = path.join(process.cwd(), 'cards');
+        const cardsDir = path.join(USER_REPO_PATH, 'cards');
         if (!fs.existsSync(cardsDir)) {
             fs.mkdirSync(cardsDir, { recursive: true });
         }

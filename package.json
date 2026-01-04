@@ -1,6 +1,7 @@
 {
   "name": "linkedin-cards",
   "version": "1.0.0",
+  "type": "module",
   "description": "Automated LinkedIn card generator from GitHub issues",
   "main": "scripts/generate-card.js",
   "scripts": {
