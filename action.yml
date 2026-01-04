@@ -1,0 +1,64 @@
+name: 'LinkedIn Cards Generator'
+description: 'Automatically generate beautiful SVG cards from your LinkedIn posts'
+author: 'Alejandro Cerezo'
+branding:
+  icon: 'linkedin'
+  color: 'blue'
+
+inputs:
+  apify_api_token:
+    description: 'Apify API token for fetching LinkedIn posts'
+    required: true
+  linkedin_username:
+    description: 'Your LinkedIn username'
+    required: true
+  max_cards_to_generate:
+    description: 'Maximum number of cards to generate'
+    required: false
+    default: '4'
+  language:
+    description: 'Card language (en, es, fr, de)'
+    required: false
+    default: 'en'
+  comment_tag_name:
+    description: 'Comment tag name for injecting cards into README'
+    required: false
+    default: 'LINKEDIN-CARDS'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Install dependencies
+      shell: bash
+      run: |
+        cd ${{ github.action_path }}
+        npm install
+    
+    - name: Generate LinkedIn cards
+      shell: bash
+      env:
+        APIFY_API_TOKEN: ${{ inputs.apify_api_token }}
+        LINKEDIN_USERNAME: ${{ inputs.linkedin_username }}
+        MAX_CARDS_TO_GENERATE: ${{ inputs.max_cards_to_generate }}
+        LANGUAGE: ${{ inputs.language }}
+        COMMENT_TAG_NAME: ${{ inputs.comment_tag_name }}
+      run: |
+        node ${{ github.action_path }}/scripts/auto-generate.js
+    
+    - name: Commit and push changes
+      shell: bash
+      run: |
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git add -A cards/ README.md 2>/dev/null || true
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Auto-generate LinkedIn cards [skip ci]"
+          git push
+        fi

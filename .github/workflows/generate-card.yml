@@ -30,6 +30,7 @@ jobs:
           LINKEDIN_USERNAME: ${{ vars.LINKEDIN_USERNAME }}
           MAX_CARDS_TO_GENERATE: ${{ vars.MAX_CARDS_TO_GENERATE }}
           LANGUAGE: ${{ vars.LANGUAGE }}
+          COMMENT_TAG_NAME: LINKEDIN-CARDS
         run: node scripts/auto-generate.js
       
       - name: Configure Git
@@ -39,7 +40,7 @@ jobs:
       
       - name: Commit changes
         run: |
-          git add -A cards/ data/ README.md 2>/dev/null || true
+          git add -A cards/ README.md 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else

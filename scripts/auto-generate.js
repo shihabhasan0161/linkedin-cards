@@ -118,60 +118,14 @@ function filterOwnPosts(items, username) {
     });
 }
 
-function getNewPosts(currentPosts, savedPostsPath) {
-    if (!fs.existsSync(savedPostsPath)) {
-        return currentPosts;
-    }
-    
-    const savedPosts = JSON.parse(fs.readFileSync(savedPostsPath, 'utf8'));
-    const savedIds = new Set(savedPosts.map(p => p.full_urn));
-    return currentPosts.filter(p => !savedIds.has(p.full_urn));
-}
-
-function savePosts(posts, filePath) {
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(filePath, JSON.stringify(posts, null, 2), 'utf-8');
-}
-
 function updateReadme(generatedCardsData, maxCards) {
     const readmePath = path.join(process.cwd(), 'README.md');
     let readme = fs.readFileSync(readmePath, 'utf8');
     
-    const timestampToUrl = {};
-    
-    const postsDataPath = path.join(process.cwd(), 'data', 'posts.json');
-    if (fs.existsSync(postsDataPath)) {
-        const postsData = JSON.parse(fs.readFileSync(postsDataPath, 'utf8'));
-        postsData.forEach(post => {
-            timestampToUrl[post.posted_at.timestamp.toString()] = post.url;
-        });
-    }
-    
-    generatedCardsData.forEach(card => {
-        timestampToUrl[card.timestamp] = card.url;
-    });
-    
-    const existingCards = [];
-    const cardPattern = /cards\/(\d+)-(light|dark)\.svg/g;
-    let match;
-    while ((match = cardPattern.exec(readme)) !== null) {
-        const timestamp = match[1];
-        if (!existingCards.includes(timestamp)) {
-            existingCards.push(timestamp);
-        }
-    }
-    
-    const allCards = [...new Set([...generatedCardsData.map(c => c.timestamp), ...existingCards])];
-    allCards.sort((a, b) => b - a);
-    const cardsToShow = allCards.slice(0, maxCards);
-    
-    const cardHTML = cardsToShow.map((timestamp, index) => {
-        const lightPath = `cards/${timestamp}-light.svg`;
-        const darkPath = `cards/${timestamp}-dark.svg`;
-        const postUrl = timestampToUrl[timestamp] || `https://linkedin.com/in/${process.env.LINKEDIN_USERNAME}`;
+    const cardHTML = generatedCardsData.map((card, index) => {
+        const lightPath = `cards/${card.timestamp}-light.svg`;
+        const darkPath = `cards/${card.timestamp}-dark.svg`;
+        const postUrl = card.url || `https://linkedin.com/in/${process.env.LINKEDIN_USERNAME}`;
         return `  <a href="${postUrl}">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="${darkPath}">
@@ -183,8 +137,9 @@ function updateReadme(generatedCardsData, maxCards) {
     
     const fullHTML = `<p align="center">\n${cardHTML}\n</p>`;
     
-    const beginMarker = '<!-- BEGIN LINKEDIN -->';
-    const endMarker = '<!-- END LINKEDIN -->';
+    const commentTag = process.env.COMMENT_TAG_NAME || 'LINKEDIN-CARDS';
+    const beginMarker = `<!-- BEGIN ${commentTag} -->`;
+    const endMarker = `<!-- END ${commentTag} -->`;
     const beginIndex = readme.indexOf(beginMarker);
     const endIndex = readme.indexOf(endMarker);
     
@@ -192,6 +147,8 @@ function updateReadme(generatedCardsData, maxCards) {
         readme = readme.substring(0, beginIndex) + beginMarker + '\n' + fullHTML + '\n' + endMarker + readme.substring(endIndex + endMarker.length);
         fs.writeFileSync(readmePath, readme, 'utf8');
         console.log('README actualizado con las tarjetas');
+    } else {
+        console.log(`No se encontraron los marcadores ${beginMarker} y ${endMarker} en README.md`);
     }
 }
 
@@ -325,42 +282,36 @@ async function generateCard(post) {
     try {
         // Ensure required directories exist
         const cardsDir = path.join(process.cwd(), 'cards');
-        const dataDir = path.join(process.cwd(), 'data');
         if (!fs.existsSync(cardsDir)) {
             fs.mkdirSync(cardsDir, { recursive: true });
         }
-        if (!fs.existsSync(dataDir)) {
-            fs.mkdirSync(dataDir, { recursive: true });
-        }
         
+        console.log('Fetching LinkedIn posts...');
         const run = await client.actor("LQQIXN9Othf8f7R5n").call(input);
         const { items } = await client.dataset(run.defaultDatasetId).listItems();
         
         const ownPosts = filterOwnPosts(items, process.env.LINKEDIN_USERNAME);
-        const postsPath = path.join(process.cwd(), 'data', 'posts.json');
-        const newPosts = getNewPosts(ownPosts, postsPath);
+        const maxCards = parseInt(process.env.MAX_CARDS_TO_GENERATE || '4', 10);
+        const postsToGenerate = ownPosts.slice(0, maxCards);
         
-        if (newPosts.length > 0) {
-            const maxCards = parseInt(process.env.MAX_CARDS_TO_GENERATE || '5', 10);
-            const postsToGenerate = newPosts.slice(0, maxCards);
-            
-            console.log(`${newPosts.length} posts nuevos detectados`);
-            console.log(`Generando tarjetas para ${postsToGenerate.length} posts`);
-            
-            const generatedCardsData = [];
-            for (const post of postsToGenerate) {
-                await generateCard(post);
-                generatedCardsData.push({
-                    timestamp: post.posted_at.timestamp.toString(),
-                    url: post.url
-                });
-            }
-            
-            updateReadme(generatedCardsData, maxCards);
-            savePosts(ownPosts, postsPath);
-        } else {
-            console.log('No hay posts nuevos');
+        if (postsToGenerate.length === 0) {
+            console.log('No posts found');
+            return;
         }
+        
+        console.log(`Generating cards for ${postsToGenerate.length} posts...`);
+        
+        const generatedCardsData = [];
+        for (const post of postsToGenerate) {
+            await generateCard(post);
+            generatedCardsData.push({
+                timestamp: post.posted_at.timestamp.toString(),
+                url: post.url
+            });
+        }
+        
+        updateReadme(generatedCardsData, maxCards);
+        console.log('✅ Cards generated successfully!');
         
     } catch (error) {
         console.error('Error:', error.message);

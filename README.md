@@ -2,7 +2,7 @@
 
 Automatically generate beautiful LinkedIn post cards and display them in your GitHub profile README. The cards update daily with your latest posts.
 
-<!-- BEGIN LINKEDIN -->
+<!-- BEGIN LINKEDIN-CARDS -->
 <p align="center">
   <a href="https://www.linkedin.com/posts/alexcerezocontreras_fundamentos-de-github-activity-7410580273488138241-sIZP?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAGDzZvgBnXqsXb6EUzbmoDxCnI-PyrDZsvM">
     <picture>
@@ -33,7 +33,7 @@ Automatically generate beautiful LinkedIn post cards and display them in your Gi
     </picture>
   </a>
 </p>
-<!-- END LINKEDIN -->
+<!-- END LINKEDIN-CARDS -->
 
 ## Features
 
@@ -42,8 +42,83 @@ Automatically generate beautiful LinkedIn post cards and display them in your Gi
 - 🔄 Daily automatic updates via GitHub Actions
 - 🌍 Multi-language support (English, Spanish, French, German...) Feel free to create a pull request adding yours.
 - 📱 Responsive SVG cards
+- 🚀 Easy setup - just add to your workflow!
 
-## Setup
+## Quick Setup (Recommended)
+
+### 1. Add Comment Tags to Your README
+
+In your profile README (or any README where you want to display the cards), add these markers:
+
+```markdown
+<!-- BEGIN LINKEDIN-CARDS -->
+<!-- END LINKEDIN-CARDS -->
+```
+
+### 2. Create Workflow File
+
+Create `.github/workflows/linkedin-cards.yml` in your repository:
+
+```yaml
+name: LinkedIn Cards
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # Runs daily at midnight
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  linkedin-cards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: alexcerezo/linkedin-cards@main
+        with:
+          apify_api_token: ${{ secrets.APIFY_API_TOKEN }}
+          linkedin_username: ${{ vars.LINKEDIN_USERNAME }}
+          max_cards_to_generate: 4
+          language: en
+```
+
+### 3. Configure Secrets and Variables
+
+**Create a Secret:**
+
+Go to Settings → Secrets and variables → Actions → Secrets:
+
+| Name | Description | How to get |
+|------|-------------|-----------|
+| `APIFY_API_TOKEN` | Your Apify API token | Create free account at [apify.com](https://apify.com) → Settings → API tokens |
+
+**Create a Variable:**
+
+Go to Settings → Secrets and variables → Actions → Variables:
+
+| Name | Description | Example |
+|------|-------------|---------|
+| `LINKEDIN_USERNAME` | Your LinkedIn username | `johndoe` (from `linkedin.com/in/johndoe`) |
+
+### 4. Run the Workflow
+
+Go to Actions tab → LinkedIn Cards → Run workflow
+
+That's it! Your README will automatically update with your latest LinkedIn posts. 🎉
+
+---
+
+## Advanced Setup (Fork Repository)
+
+If you want to customize templates or contribute to the project:
+
+---
+
+## Advanced Setup (Fork Repository)
+
+If you want to customize templates or contribute to the project:
 
 ### 1. Fork or Clone this Repository
 
@@ -54,53 +129,41 @@ cd linkedin-cards
 
 ### 2. Configure Repository Secrets and Variables
 
-**Create a Secret:**
-
-Go to Settings → Secrets and variables → Actions → Secrets → New repository secret:
-
-| Secret Name | Description | Example |
-| `APIFY_API_TOKEN` | Your Apify API token | `apify_api_xxxxx` |
-
-**Create Variables:**
-
-Go to Settings → Secrets and variables → Actions → Variables → New repository variable:
-
-| Variable Name | Description | Example |
-|--------------|-------------|---------|
-| `LINKEDIN_USERNAME` | Your LinkedIn username | `johndoe` |
-| `MAX_CARDS_TO_GENERATE` | Maximum number of cards to display | `4` |
-| `LANGUAGE` | Card language (`en`, `es`, `fr`, `de` ...) | `en` |
-
-**How to get your Apify API token:**
-1. Create a free account at [apify.com](https://apify.com)
-2. Go to Settings → Integrations → API tokens
-3. Copy your token
-
-**How to find your LinkedIn username:**
-Your LinkedIn profile URL looks like: `linkedin.com/in/johndoe` - your username is `johndoe`
+Same as Quick Setup above.
 
 ### 3. Add Markers to Your README
 
-In your profile README (or any README where you want to display the cards), add these markers:
-
 ```markdown
-<!-- BEGIN LINKEDIN -->
-<!-- END LINKEDIN -->
+<!-- BEGIN LINKEDIN-CARDS -->
+<!-- END LINKEDIN-CARDS -->
 ```
-
-The cards will be automatically inserted between these markers.
 
 ### 4. Enable GitHub Actions
 
-The workflow runs automatically every day at midnight UTC. You can also trigger it manually:
+The included workflow runs automatically. You can also trigger it manually from the Actions tab.
 
-1. Go to Actions tab in your repository
-2. Select "Auto-Generate LinkedIn Cards"
-3. Click "Run workflow"
+---
 
-### 5. Wait for the First Run
+## Configuration Options
 
-After the first execution, your README will display your latest LinkedIn posts as cards.
+### Inputs
+
+| Input | Description | Required | Default |
+|-------|-------------|----------|---------|
+| `apify_api_token` | Apify API token | ✅ Yes | - |
+| `linkedin_username` | Your LinkedIn username | ✅ Yes | - |
+| `max_cards_to_generate` | Max number of cards | ❌ No | `4` |
+| `language` | Card language | ❌ No | `en` |
+| `comment_tag_name` | Comment tag for README injection | ❌ No | `LINKEDIN-CARDS` |
+
+### Supported Languages
+
+- `en` - English
+- `es` - Spanish  
+- `fr` - French
+- `de` - German
+
+---
 
 ## Local Development
 
@@ -125,40 +188,32 @@ Run the generator:
 node scripts/auto-generate.js
 ```
 
-## Language Support
+---
 
-Currently supported languages:
-- English (`en`)
-- Spanish (`es`)
-- French (`fr`)
-- German (`de`)
+## Adding New Languages
 
-To change the language, update the `LANGUAGE` variable in your repository settings.
-
-### Adding New Languages
-
-Edit `scripts/auto-generate.js` and add your translations:
+Want to add support for your language? Edit [auto-generate.js](scripts/auto-generate.js) and add your translations:
 
 ```javascript
 const translations = {
-    es: { /* Spanish translations */ },
-    en: { /* English translations */ },
-    fr: {
-        'second': 'seconde',
-        'seconds': 'secondes',
-        'minute': 'minute',
-        'minutes': 'minutes',
-        'hour': 'heure',
-        'hours': 'heures',
-        'day': 'jour',
-        'days': 'jours',
-        'week': 'semaine',
-        'weeks': 'semaines',
-        'month': 'mois',
-        'months': 'mois',
-        'year': 'an',
-        'years': 'ans',
-        'ago': 'il y a',
+    // ... existing translations
+    pt: {  // Portuguese example
+        'second': 'segundo',
+        'seconds': 'segundos',
+        'minute': 'minuto',
+        'minutes': 'minutos',
+        'hour': 'hora',
+        'hours': 'horas',
+        'day': 'dia',
+        'days': 'dias',
+        'week': 'semana',
+        'weeks': 'semanas',
+        'month': 'mês',
+        'months': 'meses',
+        'year': 'ano',
+        'years': 'anos',
+        'ago': 'Há',
+        'comments': 'comentários',
         invertOrder: true
     }
 };
@@ -166,13 +221,19 @@ const translations = {
 
 Set `invertOrder: true` if your language places "ago" at the beginning (like Spanish: "Hace 3 semanas").
 
+Pull requests are welcome! 🌍
+
+---
+
 ## How It Works
 
-1. The GitHub Action runs daily
+1. The GitHub Action runs on a schedule (daily by default)
 2. Fetches your latest LinkedIn posts via Apify
-3. Generates SVG cards for new posts
-4. Updates your README automatically
-5. Commits changes to your repository
+3. Generates SVG cards for your most recent posts
+4. Updates your README with the new cards
+5. Commits and pushes the changes to your repository
+
+The action regenerates cards each time it runs, always showing your latest posts.
 
 ## Customization
 
